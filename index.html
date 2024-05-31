@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.0.1"></script>
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            border: 1px solid #333;
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 70px 20px 20px; /* Updated padding */
+            background-color: #f0f0f0; /* Set initial background color */
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            transition: background-color 0.3s ease-in-out; /* Added transition */
+        }
+        .dark-mode .container {
+            background-color: #000; /* Set background color for dark mode */
+        }
+        .calculator {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            text-align: center;
+            background-color: #fff; /* Set initial background color */
+            transition: background-color 0.3s ease-in-out; /* Added transition */
+        }
+        .light-mode .calculator {
+            background-color: #fff; /* Set background color for light mode */
+        }
+        .dark-mode .calculator {
+            background-color: #000; /* Set background color for dark mode */
+        }
+        .light-mode .button.utility {
+            background-color: #a5a5a5;
+            color: black;
+        }
+        .dark-mode .button.utility {
+            background-color: #333;
+            color: white;
+        }
+        .light-mode .button.operator {
+            background-color: #ff9500;
+        }
+        .dark-mode .button.operator {
+            background-color: #ff9500;
+        }
+        .light-mode .button.num-btn {
+            background-color: #333;
+            color: white;
+        }
+        .dark-mode .button.num-btn {
+            background-color: #a5a5a5;
+            color: black;
+        }
+        #display {
+            padding: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            text-align: right;
+            font-size: 2em;
+            background-color: #444;
+            color: white;
+        }
+        .button {
+            font-size: 1.5em;
+            width: 22%;
+            height: 60px;
+            margin: 1%;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .operator {
+            background-color: #ff9500;
+        }
+        .num-btn {
+            background-color: #333;
+        }
+        .utility {
+            background-color: #a5a5a5;
+            color: black;
+        }
+        @media (max-width: 768px) {
+            .button {
+                width: 23%;
+                height: 50px;
+                font-size: 1.2em;
+            }
+            #display {
+                font-size: 1.5em;
+            }
+        }
+        @media (max-width: 480px) {
+            .button {
+                width: 22%;
+                height: 40px;
+                font-size: 1em;
+            }
+            #display {
+                font-size: 1.2em;
+            }
+        }
+
+        /* Dark mode toggle button styles */
+        #dark-mode-toggle {
+            border: none;
+            border-radius: 10px;
+            padding: 5px;
+            background-color: #000;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            mix-blend-mode: difference;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        /* Dark mode style */
+        .dark-mode #dark-mode-toggle i {
+            transform: translateX(22px);
+        }
+
+        /* Switch text styles */
+        #dark-mode-toggle span {
+            font-size: 14px;
+            margin-left: 10px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <audio id="confettiSound" controls style="display:none">
+        <source src="data:audio/mpeg;base64.txt" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <div class="container">
+        <div class="calculator">
+            <input type="text" id="display" readonly><br>
+            <button class="button utility" onclick="clearInput()">AC</button>
+            <button class="button utility" onclick="calculatePercentage()">%</button>
+            <button class="button utility" onclick="deleteLast()">DEL</button>
+            <button class="button operator" onclick="divide()">÷</button>
+
+            <button class="button num-btn" onclick="appendNum(7)">7</button>
+            <button class="button num-btn" onclick="appendNum(8)">8</button>
+            <button class="button num-btn" onclick="appendNum(9)">9</button>
+            <button class="button operator" onclick="multiply()">×</button>
+
+            <button class="button num-btn" onclick="appendNum(4)">4</button>
+            <button class="button num-btn" onclick="appendNum(5)">5</button>
+            <button class="button num-btn" onclick="appendNum(6)">6</button>
+            <button class="button operator" onclick="minus()">-</button>
+
+            <button class="button num-btn" onclick="appendNum(1)">1</button>
+            <button class="button num-btn" onclick="appendNum(2)">2</button>
+            <button class="button num-btn" onclick="appendNum(3)">3</button>
+            <button class="button operator" onclick="add()">+</button>
+
+            <button class="button num-btn" onclick="appendNum('00')">00</button>
+            <button class="button num-btn" onclick="appendNum(0)">0</button>
+            <button class="button num-btn" onclick="appendNum('.')">.</button>
+            <button class="button operator" onclick="calculate()">=</button>
+        </div>
+        <button id="dark-mode-toggle" onclick="toggleDarkMode()">
+            <i class="ri-toggle-fill" style="font-size: 24px; color: white;"></i>
+            <span id="dark-mode-text">Dark Mode</span>
+        </button>
+    </div>
+
+    <script>
+        let isDarkMode = false;
+        let currentInput = "";
+        let currentOperator = "";
+        const confettiSound = document.getElementById('confettiSound');
+
+        function toggleDarkMode() {
+            const calculator = document.querySelector('.calculator');
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            const darkModeText = document.getElementById('dark-mode-text');
+
+            if (isDarkMode) {
+                calculator.classList.remove('dark-mode');
+                darkModeText.textContent = 'Dark Mode';
+            } else {
+                calculator.classList.add('dark-mode');
+                darkModeText.textContent = 'Light Mode';
+            }
+            isDarkMode = !isDarkMode;
+            darkModeToggle.classList.toggle('toggle-animate');
+            document.body.style.backgroundColor = isDarkMode ? '#000' : '#f0f0f0'; // Change body background color
+        }
+
+        function appendNum(number) {
+            currentInput += number;
+            document.getElementById("display").value = currentInput;
+        }
+
+        function add() {
+            currentOperator = "+";
+            currentInput += currentOperator;
+            document.getElementById("display").value = currentInput;
+        }
+
+        function minus() {
+            currentOperator = "-";
+            currentInput += currentOperator;
+            document.getElementById("display").value = currentInput;
+        }
+
+        function divide() {
+            currentOperator = "/";
+            currentInput += "÷";
+            document.getElementById("display").value = currentInput;
+        }
+
+        function multiply() {
+            currentOperator = "*";
+            currentInput += "×";
+            document.getElementById("display").value = currentInput;
+        }
+
+        function calculatePercentage() {
+            if (currentInput !== "") {
+                const inputValue = parseFloat(currentInput);
+                const percentage = parseFloat(prompt("Enter the percentage you want to calculate:"));
+                if (!isNaN(percentage)) {
+                    currentInput = (inputValue * (percentage / 100)).toString();
+                    document.getElementById("display").value = currentInput;
+                }
+            }
+        }
+
+        function deleteLast() {
+            currentInput = currentInput.slice(0, -1);
+            document.getElementById("display").value = currentInput;
+        }
+
+        function calculate() {
+            try {
+                const calculationString = currentInput.replace(/÷/g, '/').replace(/×/g, '*');
+                const display = eval(calculationString);
+                document.getElementById("display").value = display;
+                currentOperator = "";
+                currentInput = display.toString();
+                
+                // Trigger confetti effect
+                triggerConfetti();
+                // Play confetti sound
+                confettiSound.play();
+            } catch (e) {
+                document.getElementById("display").value = "Error";
+                currentInput = "";
+            }
+        }
+
+        function triggerConfetti() {
+            // Trigger confetti effect using the library
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            confettiSound.play();
+        }
+
+        function clearInput() {
+            currentOperator = "";
+            currentInput = "";
+            document.getElementById("display").value = "";
+        }
+    </script>
+</body>
+</html>
+
